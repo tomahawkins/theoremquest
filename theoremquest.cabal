@@ -1,7 +1,7 @@
 name:    theoremquest
 version: 0.0.0
 
-category: Game, Formal Methods
+category: Game, Formal Methods, Theorem Provers
 
 synopsis: A theorem proving game.
 
@@ -21,6 +21,9 @@ executable theoremquest-server
   hs-source-dirs:    src
   main-is:           TheoremQuestServer.hs
   build-depends:     base         >= 4.0   && < 5,
+                     network      >= 2.3   && < 2.4,
+                     url          >= 2.1   && < 2.2,
+                     utf8-string  >= 0.3   && < 0.4,
                      transformers >= 0.2   && < 0.3,
                      json         >= 0.4.4 && < 0.5,
                      http-server  >= 1     && < 2
@@ -29,8 +32,9 @@ executable theoremquest-server
 executable theoremquest
   hs-source-dirs:    src
   main-is:           TheoremQuest.hs
-  build-depends:     base         >= 4.0   && < 5,
-                     json         >= 0.4.4 && < 0.5
+  build-depends:     base         >= 4.0    && < 5,
+                     HTTP         >= 4000.1 && < 4000.2,
+                     json         >= 0.4.4  && < 0.5
   ghc-options:       -W
 
 source-repository head
