@@ -1,0 +1,59 @@
+TheoremQuest  -- Where logicians battle for prestige by deriving and controlling powerful theorems.
+
+Player status is a function of:
+  - the number of theorems a player controls
+  - and the importance of the theorems, i.e. how many other theorem depend on it.
+
+A player may capture control of another player's theorem
+by proving the theorem in a few number of lemmas.
+
+Since each inference rule produces a theorem,
+theorem complexity can be based strictly on it's number of lemmas.
+
+Each time a player invokes an inference rule, a new theorem is generated.
+If the theorem is a new discovery, the theorem is added to the library of knowledge
+and the player gains control of the theorem.  If the theorem already
+exists in the library of knowledge, but was been proven with few lemmas,
+control of the theorem is transferred to the player.
+
+
+
+
+
+Transactions between client and server.
+
+- Messages from server to client are:
+  - Strings of JavaScript object literal syntax.
+  - Strings of Haskell data types.
+
+Transactions:
+
+new theorem (client -> server)
+  - Verifies theorem.
+  - If new knowledge, server assigns a new unique theorem id and adds it to the database.
+    If the theorem has no assumptions, it searches the database for theorems that use it as
+    an assumption and performs the reductions, attributing credit to authors of the dependent theorems.
+  - If old knowledge, but with few lemmas, control is transferred to player.
+  - If old knowledge and done with the same or more lemmas, no affect on the database.  Player is notified.
+
+search theorem (client -> server)
+  - Checks if theorem is in library.  Pattern matches terms with free variables.
+  - Advanced search could perform basic inference rules to convert similar theorems into the needed form.
+  - Search on keywords.
+  - Browse by needed/requested theorems.
+
+request theorem
+  - Put forth a request for a theorem.  Equivalent to an ASSUME theorem.
+  - Post a cash reward.
+
+
+Architecture:
+  - server core: the theorem database
+  - server face: HTML presentation
+  - client: term editor, inference application (forward), backward
+
+
+User Interface:
+  Front page: news, tutorials, user login.
+  User dashboard: status, news related to theorems of interest (developed, refined, lost, etc.).
+  User project: chalkboard (strategy planning), workspaces (windows of term editors, etc.)
