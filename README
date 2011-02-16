@@ -1,4 +1,7 @@
-TheoremQuest  -- Where logicians battle for prestige by deriving and controlling powerful theorems.
+TheoremQuest -- A game where logicians battle for prestige by deriving and controlling powerful theorems.
+
+
+Notes:
 
 Player status is a function of:
   - the number of theorems a player controls
