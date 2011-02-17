@@ -1,18 +1,23 @@
 module Transactions
   ( Req (..)
   , Rsp (..)
+  , formatJSON
   ) where
 
+import Codec.Binary.UTF8.String (encodeString)
+import Network.HTTP
 import Text.JSON
 
 -- | Requests from client to server.
 data Req
   = Req
+  deriving Show
 
 -- | Responses to client requests ('Req').
 data Rsp
   = DeprecatedReq Rsp   -- ^ A warning to clients that the associated 'Req' will soon be obsolete.
   | UnknownReq          -- ^ Server did not recognize 'Req'.
+  deriving Show
 
 instance JSON Req where
   showJSON a = case a of
@@ -33,4 +38,9 @@ instance JSON Rsp where
       error -> error
     JSArray [JSString a] | fromJSString a == "UnknownReq" -> Ok UnknownReq
     a -> Error $ "invalid Req: " ++ encode a
+
+formatJSON :: JSON a => a -> ([Header], String)
+formatJSON a = ([Header HdrContentLength $ show $ length msg, Header HdrContentEncoding "UTF-8", Header HdrContentType "application/json"], msg)
+  where
+  msg = encodeString $ encode a
 
