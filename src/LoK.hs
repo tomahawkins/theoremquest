@@ -1,7 +1,8 @@
 module LoK
   (
   -- * Types
-    LoK
+    Library       (..)
+  , LoK
   , Term          (..)
   , Proposition
   , Variable      (..)
@@ -23,10 +24,16 @@ module LoK
   , unproven
   -- * Run LoK Monad
   , runLoK
+  , lowerIO
+  , liftLoK
+  , transact
   ) where
 
 import Control.Monad.IO.Class
+import Data.IORef
 import Data.List
+
+import Transactions
 
 infix 4 =.
 
@@ -139,6 +146,20 @@ runLoK oldLog newLog a = do
     Inference user rule -> inference user rule >> return ()
     Annotate id msg -> annotate id msg
 
+lowerIO :: (IORef Library -> IO a) -> LoK a
+lowerIO f = LoK $ \ lib -> do
+  lib <- newIORef lib
+  a <- f lib
+  lib <- readIORef lib
+  return (a, lib)
+
+liftLoK :: IORef Library -> LoK a -> IO a
+liftLoK lib (LoK f) = do
+  l <- readIORef lib
+  (a, l) <- f l
+  writeIORef lib l
+  return a
+
 -- | Save command to log file.
 logCommand :: Library -> Command -> IO ()
 logCommand lib cmd = appendFile (libLogFile lib) (show cmd ++ "\n")
@@ -210,5 +231,9 @@ theoremInfo = undefined
 -- Ordered by number of references.
 unproven :: Int -> LoK [(Proposition, [Theorem])]
 unproven = undefined
+
+-- | Conduct a 'Req' - 'Rsp' transaction.
+transact :: Req -> LoK Rsp
+transact req = return UnknownReq
 
 
