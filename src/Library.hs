@@ -18,7 +18,7 @@ data Library = Library
   { libNextTheoremId :: TheoremId
   , libLogFile       :: FilePath
   , libTheorems      :: [(TheoremId, Theorem)]
-  , libUsers         :: [User]
+  , libUsers         :: [(User, String)]
   , libUserTheorems  :: [(User, TheoremId)]
   , libDiscoveries   :: [(User, TheoremId)]
   , libAnnotations   :: [(TheoremId, String)]
@@ -52,5 +52,9 @@ initLibrary oldLog newLog = do
 transact :: Library -> Req -> IO (Rsp, Library)
 transact lib req = do
   appendFile (libLogFile lib) $ encode req ++ "\n"
-  return (UnknownReq, lib)
+  return $ case req of
+    Ping -> (Ack, lib)
+    NewUser user email
+      | elem user $ fst $ unzip $ libUsers lib -> (Nack "username taken", lib)
+      | otherwise -> (Ack, lib { libUsers = (user, email) : libUsers lib })
 
