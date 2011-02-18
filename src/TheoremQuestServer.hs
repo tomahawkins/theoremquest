@@ -7,7 +7,7 @@ import Network.URL
 import System.Environment
 import Text.JSON
 
-import LoK
+import Library
 import Transactions
 
 help :: IO ()
@@ -18,7 +18,10 @@ main = do
   args <- getArgs
   case args of
     [] -> help
-    args -> runLoK (restore args) (last args) $ lowerIO $ \ lib -> server $ handler lib
+    args -> do
+      lib <- initLibrary (restore args) (last args)
+      lib <- newIORef lib
+      server $ handler lib
   where
   restore :: [String] -> Maybe FilePath
   restore [] = Nothing
@@ -34,7 +37,9 @@ handler lib _ _ req = case decode $ rqBody req of
       send BadRequest UnknownReq
     Ok req -> do
       putStrLn $ "request: " ++ show req
-      rsp <- liftLoK lib $ transact req
+      l <- readIORef lib
+      (rsp, l) <- transact l req
+      writeIORef lib l
       send OK rsp
   where
   send :: StatusCode -> Rsp -> IO (Response String)

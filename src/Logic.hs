@@ -1,39 +1,17 @@
-module LoK
-  (
-  -- * Types
-    Library       (..)
-  , LoK
-  , Term          (..)
+module Logic
+  ( Term          (..)
   , Proposition
   , Variable      (..)
   , Theorem       (..)
+  , TheoremId
   , TypeVariable  (..)
   , TypeTerm      (..)
   , Inference     (..)
+  , User
   , UserInfo      (..)
   , TheoremInfo   (..)
-  -- * Administrative
-  , createUser
-  -- * Derivation
-  , inference
-  , annotate
-  -- * Queries
-  , findTheorem
-  , userInfo
-  , theoremInfo
-  , unproven
-  -- * Run LoK Monad
-  , runLoK
-  , lowerIO
-  , liftLoK
-  , transact
+  , (=.)
   ) where
-
-import Control.Monad.IO.Class
-import Data.IORef
-import Data.List
-
-import Transactions
 
 infix 4 =.
 
@@ -87,91 +65,15 @@ type User = String
 data UserInfo = UserInfo
 data TheoremInfo = TheoremInfo
 
-data Command
-  = CreateUser User
-  | Inference User Inference
-  | Annotate TheoremId String
-  deriving (Show, Read)
+(=.) :: Term -> Term -> Term
+a =. b = Comb (Comb (Const "=" TypeTerm {-"a -> a -> bool"-}) a) b
 
-data Library = Library
-  { libNextTheoremId :: TheoremId
-  , libLogFile       :: FilePath
-  , libTheorems      :: [(TheoremId, Theorem)]
-  , libUsers         :: [User]
-  , libUserTheorems  :: [(User, TheoremId)]
-  , libDiscoveries   :: [(User, TheoremId)]
-  , libAnnotations   :: [(TheoremId, String)]
-  }
-
-data LoK a = LoK (Library -> IO (a, Library))
-
-instance Monad LoK where
-  return a = LoK $ \ lib -> return (a, lib)
-  LoK f1 >>= f2 = LoK f3
-    where
-    f3 lib = do
-      (a, lib) <- f1 lib
-      let LoK f4 = f2 a
-      f4 lib
-
-instance MonadIO LoK where
-  liftIO a = LoK $ \ lib -> do
-    a <- a
-    return (a, lib)
-
-runLoK :: Maybe FilePath -> FilePath -> LoK () -> IO ()
-runLoK oldLog newLog a = do
-  writeFile newLog ""
-  f Library
-    { libNextTheoremId = 0
-    , libLogFile       = newLog
-    , libTheorems      = []
-    , libUsers         = []
-    , libUserTheorems  = []
-    , libDiscoveries   = []
-    , libAnnotations   = []
-    }
-  return ()
-  where
-  LoK f = restore >> a
-  restore :: LoK ()
-  restore = case oldLog of
-    Nothing -> return ()
-    Just oldLog -> do
-      oldLog <- liftIO $ readFile oldLog
-      mapM_ (command . read) $ lines oldLog
-  command :: Command -> LoK ()
-  command a = case a of
-    CreateUser user -> createUser user >> return ()
-    Inference user rule -> inference user rule >> return ()
-    Annotate id msg -> annotate id msg
-
-lowerIO :: (IORef Library -> IO a) -> LoK a
-lowerIO f = LoK $ \ lib -> do
-  lib <- newIORef lib
-  a <- f lib
-  lib <- readIORef lib
-  return (a, lib)
-
-liftLoK :: IORef Library -> LoK a -> IO a
-liftLoK lib (LoK f) = do
-  l <- readIORef lib
-  (a, l) <- f l
-  writeIORef lib l
-  return a
-
--- | Save command to log file.
-logCommand :: Library -> Command -> IO ()
-logCommand lib cmd = appendFile (libLogFile lib) (show cmd ++ "\n")
-
+{-
 -- | Create a new account.  Returns True if success, False if user name taken.
 createUser :: User -> LoK Bool
 createUser user = LoK $ \ lib -> if elem user $ libUsers lib
   then return (False, lib)
   else logCommand lib (CreateUser user) >> return (True, lib { libUsers = user : libUsers lib })
-
-(=.) :: Term -> Term -> Term
-a =. b = Comb (Comb (Const "=" TypeTerm {-"a -> a -> bool"-}) a) b
 
 -- | Applies an 'Inference' rule.  Returns either an error message or the resulting 'Theorem'.
 inference :: User -> Inference -> LoK (Either String Theorem)
@@ -203,7 +105,9 @@ inference user rule = case rule of
   where
   validateTheorem :: [Term] -> Term -> LoK (Either String Theorem)
   validateTheorem assumptions proposition = LoK $ \ lib -> return (Left "XXX", lib)
+-}
 
+{-
 -- | Checks if a variable is free in a term.
 freeIn :: Variable -> Term -> Bool
 freeIn = undefined
@@ -231,9 +135,4 @@ theoremInfo = undefined
 -- Ordered by number of references.
 unproven :: Int -> LoK [(Proposition, [Theorem])]
 unproven = undefined
-
--- | Conduct a 'Req' - 'Rsp' transaction.
-transact :: Req -> LoK Rsp
-transact req = return UnknownReq
-
-
+-}
