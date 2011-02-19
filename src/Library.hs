@@ -9,7 +9,6 @@ module Library
   ) where
 
 import Control.Monad
-import Text.JSON
 
 import TheoremQuest
 
@@ -41,16 +40,12 @@ initLibrary oldLog newLog = do
     , libAnnotations   = []
     }
   restore :: Library -> String -> IO Library
-  restore lib req = case decode req of
-    Error msg -> do
-      putStrLn $ "restore req parse error: " ++ msg ++ " : " ++ req
-      return lib
-    Ok a -> transact lib a >>= return . snd
-
+  restore lib req = transact lib (read req) >>= return . snd
+  
 -- | Conduct a 'Req' to 'Rsp' transaction.
 transact :: Library -> Req -> IO (Rsp, Library)
 transact lib req = do
-  appendFile (libLogFile lib) $ encode req ++ "\n"
+  appendFile (libLogFile lib) $ show req ++ "\n"
   return $ case req of
     Ping -> (Ack, lib)
     NewUser user email

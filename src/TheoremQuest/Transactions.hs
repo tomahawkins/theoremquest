@@ -12,7 +12,7 @@ import Text.JSON
 data Req
   = Ping
   | NewUser String String -- ^ username email
-  deriving Show
+  deriving (Show, Read)
 
 -- | Responses to client requests ('Req').
 data Rsp
@@ -20,7 +20,7 @@ data Rsp
   | UnknownReq          -- ^ Server did not recognize 'Req'.
   | Ack                 -- ^ Acknowledge.
   | Nack String         -- ^ No acknowledge with reason.
-  deriving Show
+  deriving (Show, Read)
 
 instance JSON Req where
   showJSON a = case a of
