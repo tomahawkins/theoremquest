@@ -31,11 +31,22 @@ executable theoremquest-server
 
 executable theoremquest
   hs-source-dirs:    src
-  main-is:           TheoremQuest.hs
+  main-is:           TheoremQuestClient.hs
   build-depends:     base         >= 4.0    && < 5,
                      HTTP         >= 4000.1 && < 4000.2,
                      json         >= 0.4.4  && < 0.5
   ghc-options:       -W
+
+library
+  hs-source-dirs:    src
+  build-depends:     base         >= 4.0    && < 5,
+                     HTTP         >= 4000.1 && < 4000.2,
+                     json         >= 0.4.4  && < 0.5
+  exposed-modules:
+    TheoremQuest
+    TheoremQuest.Logic
+    TheoremQuest.Transactions
+  ghc-options: -W
 
 source-repository head
   type:     git

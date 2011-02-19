@@ -1,4 +1,4 @@
-module Logic
+module TheoremQuest.Logic
   ( Term          (..)
   , Proposition
   , Variable      (..)

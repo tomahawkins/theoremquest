@@ -11,8 +11,7 @@ module Library
 import Control.Monad
 import Text.JSON
 
-import Logic
-import Transactions
+import TheoremQuest
 
 data Library = Library
   { libNextTheoremId :: TheoremId

@@ -8,10 +8,10 @@ import System.Environment
 import Text.JSON
 
 import Library
-import Transactions
+import TheoremQuest
 
 help :: IO ()
-help = putStrLn "usage: themoremquest-server [-p <port-number>] [-r <restore-file>] <log-file>"
+help = putStrLn "usage: themoremquest-server [-r <restore-file>] <log-file>"
 
 main :: IO ()
 main = do

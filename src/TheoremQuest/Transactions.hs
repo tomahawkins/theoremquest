@@ -1,4 +1,4 @@
-module Transactions
+module TheoremQuest.Transactions
   ( Req (..)
   , Rsp (..)
   , formatJSON
