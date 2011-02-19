@@ -2,6 +2,8 @@ module TheoremQuest.Transactions
   ( Req (..)
   , Rsp (..)
   , formatJSON
+  , formatText
+  , maybeRead
   ) where
 
 import Codec.Binary.UTF8.String (encodeString)
@@ -12,6 +14,7 @@ import Text.JSON
 data Req
   = Ping
   | NewUser String String -- ^ username email
+  | RspInJSON Req
   deriving (Show, Read)
 
 -- | Responses to client requests ('Req').
@@ -22,16 +25,6 @@ data Rsp
   | Nack String         -- ^ No acknowledge with reason.
   deriving (Show, Read)
 
-instance JSON Req where
-  showJSON a = case a of
-    Ping -> JSArray [JSString $ toJSString "Ping"]
-    NewUser name email -> JSArray $ map (JSString . toJSString) ["NewUser", name, email]
-
-  readJSON a = case a of
-    JSArray [JSString req] | fromJSString req == "Ping" -> Ok Ping
-    JSArray [JSString req, JSString username, JSString email] | fromJSString req == "NewUser" -> Ok $ NewUser (fromJSString username) (fromJSString email)
-    a -> Error $ "invalid Req: " ++ encode a
-
 instance JSON Rsp where
   showJSON a = case a of
     DeprecatedReq a -> JSArray [JSString $ toJSString "DeprecatedReq", showJSON a]
@@ -39,17 +32,22 @@ instance JSON Rsp where
     Ack             -> JSArray [JSString $ toJSString "Ack"]
     Nack a          -> JSArray $ map (JSString . toJSString) ["Nack", a]
 
-  readJSON a = case a of
-    JSArray [JSString a, b] | fromJSString a == "DeprecatedReq" -> case readJSON b of
-      Ok b -> Ok $ DeprecatedReq b
-      error -> error
-    JSArray [JSString a] | fromJSString a == "UnknownReq" -> Ok UnknownReq
-    JSArray [JSString a] | fromJSString a == "Ack"        -> Ok Ack
-    JSArray [JSString a, JSString b] | fromJSString a == "Nack" -> Ok $ Nack $ fromJSString b
-    a -> Error $ "invalid Req: " ++ encode a
+  readJSON = undefined
 
+-- | HTTP headers and body for JSON transfer.
 formatJSON :: JSON a => a -> ([Header], String)
 formatJSON a = ([Header HdrContentLength $ show $ length msg, Header HdrContentEncoding "UTF-8", Header HdrContentType "application/json"], msg)
   where
   msg = encodeString $ encode a
 
+-- | HTTP headers and body for text transfer.
+formatText :: String -> ([Header], String)
+formatText a = ([Header HdrContentLength $ show $ length msg, Header HdrContentEncoding "UTF-8", Header HdrContentType "text/plain"], msg)
+  where
+  msg = encodeString a
+
+-- | Maybe read, on parse errors return Nothing.
+maybeRead :: Read a => String -> Maybe a
+maybeRead s = case [x | (x,t) <- reads s, ("","") <- lex t] of
+  [x] -> Just x
+  _ -> Nothing

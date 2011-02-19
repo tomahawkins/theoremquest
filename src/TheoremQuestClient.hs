@@ -4,7 +4,6 @@ import Data.Maybe
 import Network.HTTP
 import Network.URI
 import System.Environment
-import Text.JSON
 
 import TheoremQuest
 
@@ -38,9 +37,9 @@ main = do
       r <- simpleHTTP $ formatReq req
       case r of
         Left e -> print e
-        Right r -> case decode $ rspBody r of
-          Error e -> error e
-          Ok a -> print (a :: Rsp)
+        Right r -> case maybeRead $ rspBody r :: Maybe Rsp of
+          Just a -> print a
+          Nothing -> putStrLn $ "response parse error: " ++ rspBody r
   where
   formatReq a = Request
     { rqURI = fromJust $ parseURI "http://localhost:8000"
@@ -49,10 +48,11 @@ main = do
     , rqBody = body
     }
     where
-    (headers, body) = formatJSON a
+    (headers, body) = formatText $ show a
 
 request :: [String] -> Maybe Req
 request args = case args of
+  "--json" : rest -> request rest >>= return . RspInJSON
   ["newuser", name, email] -> Just $ NewUser name email
   ["ping"] -> Just Ping
   _ -> Nothing

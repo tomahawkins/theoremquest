@@ -1,5 +1,6 @@
 module TheoremQuest.Logic
   ( Term          (..)
+  , TermId
   , Proposition
   , Variable      (..)
   , Theorem       (..)
@@ -7,9 +8,6 @@ module TheoremQuest.Logic
   , TypeVariable  (..)
   , TypeTerm      (..)
   , Inference     (..)
-  , User
-  , UserInfo      (..)
-  , TheoremInfo   (..)
   , (=.)
   ) where
 
@@ -22,18 +20,17 @@ data Term
   | Comb  Term Term
   deriving (Show, Read, Eq)
 
+type TermId = Int
+
 -- | A boolean term.
 type Proposition = Term
 
 data Variable = Variable String TypeTerm
   deriving (Show, Read, Eq)
 
-type TheoremId = Int
+data Theorem = Theorem [Proposition] Proposition deriving (Show, Read)
 
-data Theorem = Theorem
-  { theoremAssumptions :: [Proposition]
-  , theoremProposition :: Proposition
-  } deriving (Show, Read)
+type TheoremId = Int
 
 data TypeVariable
   = TypeVariable
@@ -60,10 +57,6 @@ data Inference
 data Axiom
   = Axiom
   deriving (Show, Read)
-
-type User = String
-data UserInfo = UserInfo
-data TheoremInfo = TheoremInfo
 
 (=.) :: Term -> Term -> Term
 a =. b = Comb (Comb (Const "=" TypeTerm {-"a -> a -> bool"-}) a) b

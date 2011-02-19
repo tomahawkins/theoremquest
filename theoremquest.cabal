@@ -23,9 +23,6 @@ executable theoremquest-server
   build-depends:     base         >= 4.0   && < 5,
                      network      >= 2.3   && < 2.4,
                      url          >= 2.1   && < 2.2,
-                     utf8-string  >= 0.3   && < 0.4,
-                     transformers >= 0.2   && < 0.3,
-                     json         >= 0.4.4 && < 0.5,
                      http-server  >= 1     && < 2
   ghc-options:       -W
 
@@ -33,14 +30,14 @@ executable theoremquest
   hs-source-dirs:    src
   main-is:           TheoremQuestClient.hs
   build-depends:     base         >= 4.0    && < 5,
-                     HTTP         >= 4000.1 && < 4000.2,
-                     json         >= 0.4.4  && < 0.5
+                     HTTP         >= 4000.1 && < 4000.2
   ghc-options:       -W
 
 library
   hs-source-dirs:    src
   build-depends:     base         >= 4.0    && < 5,
                      HTTP         >= 4000.1 && < 4000.2,
+                     utf8-string  >= 0.3   && < 0.4,
                      json         >= 0.4.4  && < 0.5
   exposed-modules:
     TheoremQuest

@@ -5,7 +5,6 @@ import Network.HTTP.Server
 import Network.Socket
 import Network.URL
 import System.Environment
-import Text.JSON
 
 import Library
 import TheoremQuest
@@ -28,20 +27,26 @@ main = do
   restore ("-r" : file : _) = Just file
   restore (_ : rest) = restore rest
 
-  --port :: [String] -> PortNumber
-
 handler :: IORef Library -> SockAddr -> URL -> Request String -> IO (Response String)
-handler lib _ _ req = case decode $ rqBody req of
-    Error e -> do
-      putStrLn $ "request parse error: " ++ e
-      send BadRequest UnknownReq
-    Ok req -> do
-      putStrLn $ "request: " ++ show req
-      l <- readIORef lib
-      (rsp, l) <- transact l req
-      writeIORef lib l
-      send OK rsp
+handler lib _ _ req = case maybeRead $ rqBody req of
+  Nothing -> do
+    putStrLn $ "request parse error: " ++ rqBody req
+    sendText BadRequest UnknownReq
+  Just req -> do
+    putStrLn $ "request: " ++ show req
+    l <- readIORef lib
+    (rsp, l) <- transact l req
+    writeIORef lib l
+    send req OK rsp
   where
-  send :: StatusCode -> Rsp -> IO (Response String)
-  send status rsp = return (respond status :: Response String) { rspHeaders = headers, rspBody = body } where (headers, body) = formatJSON rsp
+  send :: Req -> StatusCode -> Rsp -> IO (Response String)
+  send req = case req of
+    RspInJSON _ -> sendJSON
+    _           -> sendText
+    
+  sendJSON :: StatusCode -> Rsp -> IO (Response String)
+  sendJSON status rsp = return (respond status :: Response String) { rspHeaders = headers, rspBody = body } where (headers, body) = formatJSON rsp
+
+  sendText :: StatusCode -> Rsp -> IO (Response String)
+  sendText status rsp = return (respond status :: Response String) { rspHeaders = headers, rspBody = body } where (headers, body) = formatText $ show rsp
 
