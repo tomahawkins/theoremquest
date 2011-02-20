@@ -31,7 +31,7 @@ handler :: IORef Library -> SockAddr -> URL -> Request String -> IO (Response St
 handler lib _ _ req = case maybeRead $ rqBody req of
   Nothing -> do
     putStrLn $ "request parse error: " ++ rqBody req
-    sendText BadRequest UnknownReq
+    sendRsp BadRequest UnknownReq
   Just req -> do
     putStrLn $ "request: " ++ show req
     l <- readIORef lib
@@ -41,12 +41,12 @@ handler lib _ _ req = case maybeRead $ rqBody req of
   where
   send :: Req -> StatusCode -> Rsp -> IO (Response String)
   send req = case req of
-    RspInJSON _ -> sendJSON
-    _           -> sendText
+    RspInJSON _ -> sendRspInJSON
+    _           -> sendRsp
     
-  sendJSON :: StatusCode -> Rsp -> IO (Response String)
-  sendJSON status rsp = return (respond status :: Response String) { rspHeaders = headers, rspBody = body } where (headers, body) = formatJSON rsp
+  sendRspInJSON :: StatusCode -> Rsp -> IO (Response String)
+  sendRspInJSON status rsp = return (respond status :: Response String) { rspHeaders = headers, rspBody = body } where (headers, body) = formatJSON rsp
 
-  sendText :: StatusCode -> Rsp -> IO (Response String)
-  sendText status rsp = return (respond status :: Response String) { rspHeaders = headers, rspBody = body } where (headers, body) = formatText $ show rsp
+  sendRsp :: StatusCode -> Rsp -> IO (Response String)
+  sendRsp status rsp = return (respond status :: Response String) { rspHeaders = headers, rspBody = body } where (headers, body) = formatHaskell rsp
 

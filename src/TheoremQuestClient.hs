@@ -48,7 +48,7 @@ main = do
     , rqBody = body
     }
     where
-    (headers, body) = formatText $ show a
+    (headers, body) = formatHaskell a
 
 request :: [String] -> Maybe Req
 request args = case args of

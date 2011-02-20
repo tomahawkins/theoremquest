@@ -1,15 +1,19 @@
 module TheoremQuest.Logic
   ( Term          (..)
-  , TermId
   , Proposition
   , Variable      (..)
-  , Theorem       (..)
-  , TheoremId
+  , Theorem
   , TypeVariable  (..)
   , TypeTerm      (..)
   , Inference     (..)
+  , Axiom         (..)
   , (=.)
+  , assumptions
+  , proposition
+  , inference
   ) where
+
+import Data.List
 
 infix 4 =.
 
@@ -20,17 +24,21 @@ data Term
   | Comb  Term Term
   deriving (Show, Read, Eq)
 
-type TermId = Int
-
 -- | A boolean term.
 type Proposition = Term
 
 data Variable = Variable String TypeTerm
   deriving (Show, Read, Eq)
 
-data Theorem = Theorem [Proposition] Proposition deriving (Show, Read)
+data Theorem = Theorem [Proposition] Proposition
 
-type TheoremId = Int
+-- | Assumptions of a 'Theorem'.
+assumptions :: Theorem -> [Proposition]
+assumptions (Theorem a _) = a
+
+-- | Proposition of a 'Theorem'.
+proposition :: Theorem -> Proposition
+proposition (Theorem _ a) = a
 
 data TypeVariable
   = TypeVariable
@@ -40,17 +48,17 @@ data TypeTerm
   = TypeTerm
   deriving (Show, Read, Eq)
 
-data Inference
+data Inference a
   = REFL                Term
-  | TRANS               Theorem Theorem
-  | MK_COMB             Theorem Theorem
-  | ABS                 Term Theorem
+  | TRANS               a a
+  | MK_COMB             a a
+  | ABS                 Term a
   | BETA                Term Term
   | ASSUME              Term
-  | EQ_MP               Theorem Theorem
-  | DEDUCT_ANTISYM_RULE Theorem Theorem
-  | INST                Theorem [(Variable, Term)]
-  | INST_TYPE           Theorem [(TypeVariable, TypeTerm)]
+  | EQ_MP               a a
+  | DEDUCT_ANTISYM_RULE a a
+  | INST                a [(Variable, Term)]
+  | INST_TYPE           a [(TypeVariable, TypeTerm)]
   | AXIOM               Axiom
   deriving (Show, Read)
 
@@ -61,16 +69,9 @@ data Axiom
 (=.) :: Term -> Term -> Term
 a =. b = Comb (Comb (Const "=" TypeTerm {-"a -> a -> bool"-}) a) b
 
-{-
--- | Create a new account.  Returns True if success, False if user name taken.
-createUser :: User -> LoK Bool
-createUser user = LoK $ \ lib -> if elem user $ libUsers lib
-  then return (False, lib)
-  else logCommand lib (CreateUser user) >> return (True, lib { libUsers = user : libUsers lib })
-
--- | Applies an 'Inference' rule.  Returns either an error message or the resulting 'Theorem'.
-inference :: User -> Inference -> LoK (Either String Theorem)
-inference user rule = case rule of
+-- | Creates a 'Theorem' from an 'Inference' rule application.
+inference :: Inference Theorem -> Maybe Theorem
+inference rule = case rule of
   REFL a -> validateTheorem [] (a =. a)
   TRANS (Theorem a1 (Comb (Comb (Const "=" _) a2) a3)) (Theorem b1 (Comb (Comb (Const "=" _) b2) b3)) | a3 == b2 -> validateTheorem (union a1 b1) (a2 =. b3)
   MK_COMB (Theorem a1 (Comb (Comb (Const "=" _) a2) a3)) (Theorem b1 (Comb (Comb (Const "=" _) b2) b3)) -> validateTheorem (union a1 b1) (Comb a2 b2 =. Comb a3 b3)
@@ -90,42 +91,13 @@ inference user rule = case rule of
       Comb a b -> Comb (replace subs a) (replace subs b)
   -- INST_TYPE           Theorem [(TypeVariable, TypeTerm)]
   -- AXIOM               Axiom
-  _ -> return $ Left "invalid inference pattern"
+  _ -> Nothing
 
-  --logCommand lib $ Inference user rule
-  -- XXX let theorem = Theorem (libNextTheoremId lib) (
-  --return (Left "XXX", lib)
-  where
-  validateTheorem :: [Term] -> Term -> LoK (Either String Theorem)
-  validateTheorem assumptions proposition = LoK $ \ lib -> return (Left "XXX", lib)
--}
+-- | Validates (type checks) a theorem.
+validateTheorem :: [Term] -> Term -> Maybe Theorem
+validateTheorem assumptions proposition = Just $ Theorem assumptions proposition --XXX
 
-{-
 -- | Checks if a variable is free in a term.
 freeIn :: Variable -> Term -> Bool
 freeIn = undefined
 
--- | Marks a 'Theorem' with a note.
-annotate :: TheoremId -> String -> LoK ()
-annotate id msg = LoK $ \ lib -> if elem id [ id | (id, _) <- libTheorems lib ]
-  then logCommand lib (Annotate id msg) >> return ((), lib { libAnnotations = (id, msg) : libAnnotations lib })
-  else return ((), lib)
-
--- | Find a matching 'Theorem'.
-findTheorem :: Proposition -> LoK (Maybe Theorem)
-findTheorem = undefined
-
--- | User information.
-userInfo :: User -> LoK UserInfo
-userInfo = undefined
-
--- | Theorem information.
-theoremInfo :: Theorem -> LoK TheoremInfo
-theoremInfo = undefined
-
--- | Starting from an index, a list of 100 unproven propositions
--- grouped with theorems that need them.
--- Ordered by number of references.
-unproven :: Int -> LoK [(Proposition, [Theorem])]
-unproven = undefined
--}
