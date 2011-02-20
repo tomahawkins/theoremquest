@@ -91,7 +91,7 @@ response lib req = case req of
           { libTheorems = (id, (b, a)) : libTheorems lib
           , libTheoremsDiscovered = (user, id) : libTheoremsDiscovered lib  --XXX  Need to check if theorem is unique, with variable renaming.
           , libTheoremsControlled = (user, id) : libTheoremsControlled lib  --XXX  Dito.
-	  }
+          }
 
   TheoremAssumptions a -> case lookup a $ libTheorems lib of
     Nothing -> (Nack "theorem not found", lib)
@@ -101,6 +101,7 @@ response lib req = case req of
     Nothing -> (Nack "theorem not found", lib)
     Just (a, _) -> (Term $ proposition a, lib)
 
+  TheoremSearch _ _ -> (Ids [], lib)
 
 replaceTheoremIds :: Library -> Inference TheoremId -> Maybe (Inference Theorem)
 replaceTheoremIds lib rule = case rule of

@@ -27,6 +27,7 @@ data Req
   | Inference User (Inference TheoremId)   -- ^ Submit an inference.  Server will validate the inference and return a theorem.
   | TheoremAssumptions TheoremId           -- ^ Request a theorem's assumptions.
   | TheoremProposition TheoremId           -- ^ Request a theorem's proposition.
+  | TheoremSearch Term Int                 -- ^ Search for a theorem similar to a term.  Return a list of ids starting at the given index.
   deriving (Show, Read)
 
 -- | Responses to client requests.
@@ -36,6 +37,7 @@ data Rsp
   | Ack                 -- ^ Acknowledge.
   | Nack String         -- ^ No acknowledge with reason.
   | Id Int              -- ^ A unique id.  Usually a 'TheoremId'.
+  | Ids [Int]           -- ^ A list of unique ids.
   | Term Term           -- ^ A term.
   | Terms [Term]        -- ^ A list of terms.
   deriving (Show, Read)
