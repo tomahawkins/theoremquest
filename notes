@@ -3,6 +3,17 @@ TheoremQuest -- A game where logicians battle for prestige by deriving and contr
 
 Notes:
 
+Client Interface:
+
+Instead of a custom shell, maybe leverage existing shell, where files can be 
+items in the workarea (terms, theorems, etc), and a minimal command program (tq) 
+would provide actions on these items.
+
+
+
+
+General Play:
+
 Player status is a function of:
   - the number of theorems a player controls
   - and the importance of the theorems, i.e. how many other theorem depend on it.
@@ -23,11 +34,6 @@ control of the theorem is transferred to the player.
 
 
 
-Transactions between client and server.
-
-- Messages from server to client are:
-  - Strings of JavaScript object literal syntax.
-  - Strings of Haskell data types.
 
 Transactions:
 
@@ -60,3 +66,6 @@ User Interface:
   Front page: news, tutorials, user login.
   User dashboard: status, news related to theorems of interest (developed, refined, lost, etc.).
   User project: chalkboard (strategy planning), workspaces (windows of term editors, etc.)
+
+
+

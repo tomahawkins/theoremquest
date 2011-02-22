@@ -63,6 +63,41 @@ releaseId lib id = lib { libFreeIds = release free next }
     | a + 1 == c = release b a
     | otherwise = (a : b, c)
   
+replaceTheoremIds :: Library -> Inference TheoremId -> Maybe (Inference Theorem)
+replaceTheoremIds lib rule = case rule of
+  REFL a -> Just $ REFL a
+  TRANS a b -> do
+    a <- theorem a
+    b <- theorem b
+    return $ TRANS a b
+  MK_COMB a b -> do
+    a <- theorem a
+    b <- theorem b
+    return $ MK_COMB a b
+  ABS a b -> do
+    b <- theorem b
+    return $ ABS a b
+  BETA a b -> Just $ BETA a b
+  ASSUME a -> Just $ ASSUME a
+  EQ_MP a b -> do
+    a <- theorem a
+    b <- theorem b
+    return $ EQ_MP a b
+  DEDUCT_ANTISYM_RULE a b -> do
+    a <- theorem a
+    b <- theorem b
+    return $ DEDUCT_ANTISYM_RULE a b
+  INST a b -> do
+    a <- theorem a
+    return $ INST a b
+  INST_TYPE a b -> do
+    a <- theorem a
+    return $ INST_TYPE a b
+  AXIOM a -> Just $ AXIOM a
+  where
+  theorem :: TheoremId -> Maybe Theorem
+  theorem id = lookup id (libTheorems lib) >>= return . fst
+
 -- | Conduct a 'Req' to 'Rsp' transaction.
 transact :: Library -> Req -> IO (Rsp, Library)
 transact lib req = do
@@ -102,39 +137,4 @@ response lib req = case req of
     Just (a, _) -> (Term $ proposition a, lib)
 
   TheoremSearch _ _ -> (Ids [], lib)
-
-replaceTheoremIds :: Library -> Inference TheoremId -> Maybe (Inference Theorem)
-replaceTheoremIds lib rule = case rule of
-  REFL a -> Just $ REFL a
-  TRANS a b -> do
-    a <- theorem a
-    b <- theorem b
-    return $ TRANS a b
-  MK_COMB a b -> do
-    a <- theorem a
-    b <- theorem b
-    return $ MK_COMB a b
-  ABS a b -> do
-    b <- theorem b
-    return $ ABS a b
-  BETA a b -> Just $ BETA a b
-  ASSUME a -> Just $ ASSUME a
-  EQ_MP a b -> do
-    a <- theorem a
-    b <- theorem b
-    return $ EQ_MP a b
-  DEDUCT_ANTISYM_RULE a b -> do
-    a <- theorem a
-    b <- theorem b
-    return $ DEDUCT_ANTISYM_RULE a b
-  INST a b -> do
-    a <- theorem a
-    return $ INST a b
-  INST_TYPE a b -> do
-    a <- theorem a
-    return $ INST_TYPE a b
-  AXIOM a -> Just $ AXIOM a
-  where
-  theorem :: TheoremId -> Maybe Theorem
-  theorem id = lookup id (libTheorems lib) >>= return . fst
 

@@ -11,19 +11,19 @@ help :: IO ()
 help = putStrLn $ unlines
   [ ""
   , "NAME"
-  , "  theoremquest -- a simple shell interface to theoremquest"
+  , "  tq -- a simple shell-based theoremquest client"
   , ""
   , "SYNOPSYS"
-  , "  theoremquest command { option } { arguments }"
+  , "  tq [ command { option } { arguments } ]"
   , ""
   , "COMMANDS"
-  , "  theoremquest help"
+  , "  tq help"
   , "    Print this information."
   , ""
-  , "  theoremquest ping"
+  , "  tq ping"
   , "    Ping the server."
   , ""
-  , "  theoremquest newuser <username> <email>"
+  , "  tq newuser <username> <email>"
   , "    Create a new user."
   , ""
   ]
@@ -57,3 +57,28 @@ request args = case args of
   ["ping"] -> Just Ping
   _ -> Nothing
 
+{-
+login :: IO ()
+login = do
+  putStrLn "Welcome to TheoremQuest"
+  putStr "username: "
+  hFlush stdout
+  user <- getLine
+  shell user
+
+shell :: String -> IO ()
+shell user = do
+  putStr "theoremquest> "
+  hFlush stdout
+  l <- getLine
+  case l of
+    "?" -> shellHelp
+    "help" -> shellHelp
+    "exit" -> return ()
+    "" -> return ()
+    a -> putStrLn ("unknown command: " ++ a ++ ", type ? for help")
+  when (l /= "exit") (shell user)
+
+shellHelp :: IO ()
+shellHelp = putStrLn "help"
+-}

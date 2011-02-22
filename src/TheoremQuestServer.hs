@@ -10,7 +10,7 @@ import Library
 import TheoremQuest
 
 help :: IO ()
-help = putStrLn "usage: themoremquest-server [-r <restore-file>] <log-file>"
+help = putStrLn "usage: tqd [-r <restore-file>] <log-file>"
 
 main :: IO ()
 main = do
