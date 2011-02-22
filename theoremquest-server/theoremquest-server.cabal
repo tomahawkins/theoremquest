@@ -1,0 +1,32 @@
+name:    theoremquest-server
+version: 0.0.0
+
+category: Game, Formal Methods, Theorem Provers
+
+synopsis: The TheoremQuest server.
+
+description:
+  TODO
+
+author:     Tom Hawkins <tomahawkins@gmail.com>
+maintainer: Tom Hawkins <tomahawkins@gmail.com>
+
+build-type:    Simple
+cabal-version: >= 1.6
+
+license:      BSD3
+license-file: LICENSE
+
+executable tqd
+  main-is:           TheoremQuestServer.hs
+  build-depends:     base         >= 4.0   && < 5,
+                     network      >= 2.3   && < 2.4,
+                     url          >= 2.1   && < 2.2,
+                     http-server  >= 1     && < 2,
+                     theoremquest >= 0.0.0
+  ghc-options:       -W
+
+source-repository head
+  type:     git
+  location: git://github.com/tomahawkins/theoremquest.git
+

@@ -17,24 +17,7 @@ cabal-version: >= 1.6
 license:      BSD3
 license-file: LICENSE
 
-executable tqd
-  hs-source-dirs:    src
-  main-is:           TheoremQuestServer.hs
-  build-depends:     base         >= 4.0   && < 5,
-                     network      >= 2.3   && < 2.4,
-                     url          >= 2.1   && < 2.2,
-                     http-server  >= 1     && < 2
-  ghc-options:       -W
-
-executable tq
-  hs-source-dirs:    src
-  main-is:           TheoremQuestClient.hs
-  build-depends:     base         >= 4.0    && < 5,
-                     HTTP         >= 4000.1 && < 4000.2
-  ghc-options:       -W
-
 library
-  hs-source-dirs:    src
   build-depends:     base         >= 4.0    && < 5,
                      HTTP         >= 4000.1 && < 4000.2,
                      utf8-string  >= 0.3   && < 0.4,
