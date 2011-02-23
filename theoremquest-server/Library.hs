@@ -1,22 +1,15 @@
 module Library
-  (
-  -- * Types
-    Library
-  -- * Library Init
+  ( Library
   , initLibrary
-  -- * Library Transaction
   , transact
   ) where
 
 import Control.Monad
-import Data.List
 
 import TheoremQuest
 
-type TheoremId = Int
-
 data Library = Library
-  { libFreeIds            :: ([Int], Int)
+  { libNextId             :: Int
   , libLogFile            :: FilePath
   , libTheorems           :: [(TheoremId, (Theorem, Inference Theorem))]
   , libUsers              :: [(User, Email)]
@@ -34,7 +27,7 @@ initLibrary oldLog newLog = do
     Just oldLog -> readFile oldLog >>= foldM restore lib . lines
   where
   lib = Library
-    { libFreeIds            = ([], 0)
+    { libNextId             = 0
     , libLogFile            = newLog
     , libTheorems           = []
     , libUsers              = []
@@ -47,21 +40,7 @@ initLibrary oldLog newLog = do
 
 -- | Next unique id.
 nextId :: Library -> (Int, Library)
-nextId lib = case libFreeIds lib of
-  ([], a) -> (a, lib { libFreeIds = ([], a + 1) })
-  (a : b, c) -> (a, lib { libFreeIds = (b, c) })
-
--- | Release an unused id.
-releaseId :: Library -> Int -> Library
-releaseId lib id = lib { libFreeIds = release free next }
-  where
-  (free', next) = libFreeIds lib
-  free = insertBy (flip compare) id free'
-  release :: [Int] -> Int -> ([Int], Int)
-  release [] a = ([], a)
-  release (a : b) c
-    | a + 1 == c = release b a
-    | otherwise = (a : b, c)
+nextId lib = (libNextId lib, lib { libNextId = libNextId lib + 1 })
   
 replaceTheoremIds :: Library -> Inference TheoremId -> Maybe (Inference Theorem)
 replaceTheoremIds lib rule = case rule of
@@ -115,6 +94,7 @@ response lib req = case req of
 
   RspInJSON req -> response lib req
 
+  Inference user _ | not $ elem user [ user | (user, _) <- libUsers lib ] -> (Nack "unknown user", lib)
   Inference user a -> case replaceTheoremIds lib a of
     Nothing -> (Nack "unknown theorems in inference", lib)
     Just a -> case inference a of

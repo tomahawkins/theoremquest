@@ -3,6 +3,7 @@ module TheoremQuest.Transactions
   , Rsp (..)
   , User
   , Email
+  , TheoremId
   , formatJSON
   , formatText
   , formatHaskell
