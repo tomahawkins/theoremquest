@@ -10,7 +10,7 @@ import Library
 import TheoremQuest
 
 help :: IO ()
-help = putStrLn "usage: tqd [-r <restore-file>] <log-file>"
+help = putStrLn "usage: tqd { -a <host-name>[:<port-number>] | -r <restore-file> } <log-file>"
 
 main :: IO ()
 main = do
@@ -18,14 +18,22 @@ main = do
   case args of
     [] -> help
     args -> do
-      lib <- initLibrary (restore args) (last args)
-      lib <- newIORef lib
-      server $ handler lib
+      lib <- initLibrary (restore args) (last args) >>= newIORef
+      serverWith (config args) (handler lib)
   where
   restore :: [String] -> Maybe FilePath
   restore [] = Nothing
-  restore ("-r" : file : _) = Just file
+  restore ("-r" : file : _ : _) = Just file
   restore (_ : rest) = restore rest
+
+  config :: [String] -> Config
+  config [] = defaultConfig
+  config ("-a" : host : _ : _) = defaultConfig { srvHost = takeWhile (/= ':') host, srvPort = fromIntegral p }
+    where
+    p :: Int
+    p | elem ':' host = read $ reverse $ takeWhile (/= ':') $ reverse host
+      | otherwise = 8000
+  config (_ : rest) = config rest
 
 handler :: IORef Library -> SockAddr -> URL -> Request String -> IO (Response String)
 handler lib _ _ req = case maybeRead $ rqBody req of

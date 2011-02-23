@@ -45,6 +45,9 @@ help = putStrLn $ unlines
   , "  THEOREMQUEST_USER"
   , "    The TheoremQuest username to use for transactions.  Required for inference commands."
   , ""
+  , "  THEOREMQUEST_SERVER"
+  , "    The host name and port of the TheoremQuest server.  Default: localhost:8000"
+  , ""
   ]
 
 main :: IO ()
@@ -53,21 +56,37 @@ main = getArgs >>= go
 -- | Conduct a transaction with the server.
 transact :: Req -> IO Rsp
 transact req = do
-  r <- simpleHTTP $ formatReq req
+  server <- server
+  r <- simpleHTTP $ formatReq server req
   case r of
     Left e -> error $ "failed transaction: " ++ show e
     Right r -> case maybeRead $ rspBody r of
       Just a -> return a
       Nothing -> error $ "response parse error: " ++ rspBody r
   where
-  formatReq a = Request
-    { rqURI = fromJust $ parseURI "http://localhost:8000"
+  formatReq uri a = Request
+    { rqURI = uri
+    -- { rqURI uri = fromJust $ parseURI "http://localhost:8000"
     , rqMethod = POST
     , rqHeaders = headers
     , rqBody = body
     }
     where
     (headers, body) = formatHaskell a
+
+username :: IO String
+username = do
+  env <- getEnvironment
+  case lookup "THEOREMQUEST_USER" env of
+    Just user -> return user
+    Nothing -> error "environment variable THEOREMQUEST_USER not set"
+
+server :: IO URI
+server = do
+  env <- getEnvironment
+  return $ fromJust $ parseURI $ "http://" ++ case lookup "THEOREMQUEST_SERVER" env of
+    Nothing -> "localhost:8000"
+    Just a  -> a
 
 go :: [String] -> IO ()
 go args = case args of
@@ -94,11 +113,4 @@ go args = case args of
   ["check-variable", a] -> print (read a :: Variable)
   ["check-inference", a] -> print (read a :: Inference TheoremId)
   _ -> help
-
-username :: IO String
-username = do
-  env <- getEnvironment
-  case lookup "THEOREMQUEST_USER" env of
-    Just user -> return user
-    Nothing -> error "environment variable THEOREMQUEST_USER not set"
 
