@@ -27,7 +27,7 @@ data Req
   | RspInJSON Req                          -- ^ Send response in JSON.
   | Inference User (Inference TheoremId)   -- ^ Submit an inference.  Server will validate the inference and return a theorem.
   | TheoremAssumptions TheoremId           -- ^ Request a theorem's assumptions.
-  | TheoremProposition TheoremId           -- ^ Request a theorem's proposition.
+  | TheoremConclusion  TheoremId           -- ^ Request a theorem's conclusion.
   | TheoremSearch Term Int                 -- ^ Search for a theorem similar to a term.  Return a list of ids starting at the given index.
   deriving (Show, Read)
 

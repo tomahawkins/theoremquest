@@ -75,12 +75,12 @@ go args = case args of
   ["ping"] -> transact Ping >>= print
   ["theorem", n] -> do
     r1 <- transact (TheoremAssumptions theorem)
-    r2 <- transact (TheoremProposition theorem)
+    r2 <- transact (TheoremConclusion  theorem)
     case (r1, r2) of
       (Terms a, Term b) -> do
         putStrLn "assumptions:"
         mapM_ print a
-        putStrLn "proposition:"
+        putStrLn "conclusion:"
         print b
       _ -> print (r1, r2)
     where

@@ -9,7 +9,7 @@ module TheoremQuest.Logic
   , Axiom         (..)
   , (=.)
   , assumptions
-  , proposition
+  , conclusion
   , inference
   ) where
 
@@ -36,9 +36,9 @@ data Theorem = Theorem [Proposition] Proposition
 assumptions :: Theorem -> [Proposition]
 assumptions (Theorem a _) = a
 
--- | Proposition of a 'Theorem'.
-proposition :: Theorem -> Proposition
-proposition (Theorem _ a) = a
+-- | Conclusion of a 'Theorem'.
+conclusion :: Theorem -> Proposition
+conclusion (Theorem _ a) = a
 
 data TypeVariable
   = TypeVariable
@@ -53,7 +53,7 @@ data Inference a
   | TRANS               a a
   | MK_COMB             a a
   | ABS                 Term a
-  | BETA                Term Term
+  | BETA                Term
   | ASSUME              Term
   | EQ_MP               a a
   | DEDUCT_ANTISYM_RULE a a
@@ -76,7 +76,7 @@ inference rule = case rule of
   TRANS (Theorem a1 (Comb (Comb (Const "=" _) a2) a3)) (Theorem b1 (Comb (Comb (Const "=" _) b2) b3)) | a3 == b2 -> validateTheorem (union a1 b1) (a2 =. b3)
   MK_COMB (Theorem a1 (Comb (Comb (Const "=" _) a2) a3)) (Theorem b1 (Comb (Comb (Const "=" _) b2) b3)) -> validateTheorem (union a1 b1) (Comb a2 b2 =. Comb a3 b3)
   ABS (Var x) (Theorem a1 (Comb (Comb (Const "=" _) a2) a3)) | not $ any (freeIn x) a1 -> validateTheorem a1 (Abs x a2 =. Abs x a3)
-  BETA (Var x) t -> validateTheorem [] $ Comb (Abs x t) (Var x) =. t
+  BETA a@(Comb (Abs x1 t)(Var x2)) | x1 == x2 -> validateTheorem [] $ a =. t
   ASSUME p -> validateTheorem [p] p
   EQ_MP (Theorem a1 (Comb (Comb (Const "=" _) a2) a3)) (Theorem b1 b2) | a2 == b2 -> validateTheorem (union a1 b1) a3
   DEDUCT_ANTISYM_RULE (Theorem a1 a2) (Theorem b1 b2) -> validateTheorem (union (delete b2 a1) (delete a2 b1)) $ a2 =. b2

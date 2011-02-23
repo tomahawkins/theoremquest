@@ -56,7 +56,7 @@ replaceTheoremIds lib rule = case rule of
   ABS a b -> do
     b <- theorem b
     return $ ABS a b
-  BETA a b -> Just $ BETA a b
+  BETA a -> Just $ BETA a
   ASSUME a -> Just $ ASSUME a
   EQ_MP a b -> do
     a <- theorem a
@@ -112,9 +112,9 @@ response lib req = case req of
     Nothing -> (Nack "theorem not found", lib)
     Just (a, _) -> (Terms $ assumptions a, lib)
 
-  TheoremProposition a -> case lookup a $ libTheorems lib of
+  TheoremConclusion a -> case lookup a $ libTheorems lib of
     Nothing -> (Nack "theorem not found", lib)
-    Just (a, _) -> (Term $ proposition a, lib)
+    Just (a, _) -> (Term $ conclusion a, lib)
 
   TheoremSearch _ _ -> (Ids [], lib)
 
