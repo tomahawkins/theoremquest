@@ -46,7 +46,7 @@ help = putStrLn $ unlines
   , "    The TheoremQuest username to use for transactions.  Required for inference commands."
   , ""
   , "  THEOREMQUEST_SERVER"
-  , "    The host name and port of the TheoremQuest server.  Default: localhost:8000"
+  , "    URI of the TheoremQuest server.  Default: http://localhost:8000"
   , ""
   ]
 
@@ -62,11 +62,10 @@ transact req = do
     Left e -> error $ "failed transaction: " ++ show e
     Right r -> case maybeRead $ rspBody r of
       Just a -> return a
-      Nothing -> error $ "response parse error: " ++ rspBody r
+      Nothing -> error $ "response parse error: " ++ show (rspHeaders r) ++ "  " ++ rspBody r
   where
   formatReq uri a = Request
     { rqURI = uri
-    -- { rqURI uri = fromJust $ parseURI "http://localhost:8000"
     , rqMethod = POST
     , rqHeaders = headers
     , rqBody = body
@@ -84,8 +83,8 @@ username = do
 server :: IO URI
 server = do
   env <- getEnvironment
-  return $ fromJust $ parseURI $ "http://" ++ case lookup "THEOREMQUEST_SERVER" env of
-    Nothing -> "localhost:8000"
+  return $ fromJust $ parseURI $ case lookup "THEOREMQUEST_SERVER" env of
+    Nothing -> "http://localhost:8000"
     Just a  -> a
 
 go :: [String] -> IO ()

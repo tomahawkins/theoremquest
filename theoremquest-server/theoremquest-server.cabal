@@ -26,6 +26,15 @@ executable tqd
                      theoremquest >= 0.0.0
   ghc-options:       -W
 
+executable tqcgi
+  main-is:           TheoremQuestServerCGI.hs
+  build-depends:     base         >= 4.0    && < 5,
+                     network      >= 2.3   && < 2.4,
+                     HTTP         >= 4000.1 && < 4000.2,
+                     theoremquest >= 0.0.0
+  ghc-options:       -W
+
+
 source-repository head
   type:     git
   location: git://github.com/tomahawkins/theoremquest.git
