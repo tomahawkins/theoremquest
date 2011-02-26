@@ -15,8 +15,8 @@ tqd:
 
 .PHONY: upload
 upload:
-	scp ~/.cabal/bin/tqd   hawkit1@tomahawkins.org:.
-	scp ~/.cabal/bin/tqcgi hawkit1@tomahawkins.org:cgi-bin
+	scp ~/.cabal/bin/tqd   tomahawkins.org:.
+	scp ~/.cabal/bin/tqcgi tomahawkins.org:cgi-bin
 
 .PHONY: clean
 clean:

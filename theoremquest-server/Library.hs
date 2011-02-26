@@ -62,15 +62,15 @@ replaceTheoremIds lib rule = case rule of
     a <- theorem a
     b <- theorem b
     return $ EQ_MP a b
-  DEDUCT_ANTISYM_RULE a b -> do
+  DEDUCT_ANTISYM a b -> do
     a <- theorem a
     b <- theorem b
-    return $ DEDUCT_ANTISYM_RULE a b
+    return $ DEDUCT_ANTISYM a b
   INST a b -> do
-    a <- theorem a
+    b <- theorem b
     return $ INST a b
   INST_TYPE a b -> do
-    a <- theorem a
+    b <- theorem b
     return $ INST_TYPE a b
   AXIOM a -> Just $ AXIOM a
   where

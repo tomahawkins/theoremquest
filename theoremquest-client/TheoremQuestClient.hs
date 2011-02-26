@@ -84,7 +84,7 @@ server :: IO URI
 server = do
   env <- getEnvironment
   return $ fromJust $ parseURI $ case lookup "THEOREMQUEST_SERVER" env of
-    Nothing -> "http://localhost:8000"
+    Nothing -> "http://theoremquest.org/cgi-bin/tqcgi"
     Just a  -> a
 
 go :: [String] -> IO ()
@@ -93,14 +93,17 @@ go args = case args of
   ["ping"] -> transact Ping >>= print
   ["theorem", n] -> do
     r1 <- transact (TheoremAssumptions theorem)
-    r2 <- transact (TheoremConclusion  theorem)
-    case (r1, r2) of
-      (Terms a, Term b) -> do
-        putStrLn "assumptions:"
-        mapM_ print a
-        putStrLn "conclusion:"
-        print b
-      _ -> print (r1, r2)
+    case r1 of
+      Terms a -> do
+        r2 <- transact (TheoremConclusion theorem)
+        case r2 of
+          Term b -> do
+            putStrLn "assumptions:"
+            mapM_ print a
+            putStrLn "conclusion:"
+            print b
+          _ -> print r2
+      _ -> print r1
     where
     theorem = read n
   ["infer", a] -> do
