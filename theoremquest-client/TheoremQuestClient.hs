@@ -108,7 +108,6 @@ go args = case args of
     theorem = read n
   ["infer", a] -> do
     user <- username
-    putStrLn a
     r <- transact $ Inference user $ read a
     print r
   ["check-term", a] -> print (read a :: Term)

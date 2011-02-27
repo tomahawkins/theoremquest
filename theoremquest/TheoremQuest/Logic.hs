@@ -50,7 +50,6 @@ conclusion (Theorem _ a) = a
 data Type
   = Bool
   | Type :-> Type
-  | NotWellTyped
   deriving (Show, Read)
 
 instance Eq Type where
@@ -86,7 +85,7 @@ instance TypeOf Term where
     Var v -> typeOf v
     Comb f _ -> case typeOf f of
       _ :-> a -> a
-      _ -> NotWellTyped
+      _ -> error "invalid type for Comb"
     Abs (Variable _ t) b -> t :-> typeOf b
 
 (=.) :: Term -> Term -> Term
@@ -129,7 +128,7 @@ wellTyped a = wellTyped (freeVariables a) a
   where
   wellTyped :: [Variable] -> Term -> Bool
   wellTyped env a = case a of
-    Const _ NotWellTyped -> False
+    Const _ (_ :-> _) -> False
     Const _ _ -> True
     Var v -> wellTypedVar env v
     Comb fun arg -> case typeOf fun of
@@ -138,7 +137,6 @@ wellTyped a = wellTyped (freeVariables a) a
     Abs x t -> wellTyped (x : env) t
 
   wellTypedVar :: [Variable] -> Variable -> Bool
-  wellTypedVar _ (Variable _ NotWellTyped) = False
   wellTypedVar [] _ = False
   wellTypedVar (Variable name t : rest) v@(Variable name' t')
     | name == name' = t == t'
