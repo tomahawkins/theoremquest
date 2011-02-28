@@ -20,7 +20,7 @@ license-file: LICENSE
 executable tq
   main-is:           TheoremQuestClient.hs
   build-depends:     base         >= 4.0    && < 5,
-                     network      >= 2.3   && < 2.4,
+                     network      >= 2.3    && < 2.4,
                      HTTP         >= 4000.1 && < 4000.2,
                      theoremquest >= 0.0.0
   ghc-options:       -W

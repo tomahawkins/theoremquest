@@ -43,10 +43,10 @@ help = putStrLn $ unlines
   , ""
   , "ENVIRONMENT VARIABLES"
   , "  THEOREMQUEST_USER"
-  , "    The TheoremQuest username to use for transactions.  Required for inference commands."
+  , "    The TheoremQuest username to use for transactions.  Required for infer commands."
   , ""
   , "  THEOREMQUEST_SERVER"
-  , "    URI of the TheoremQuest server.  Default: http://localhost:8000"
+  , "    URI of the TheoremQuest server.  Default: http://theoremquest.org/cgi-bin/tqcgi"
   , ""
   ]
 

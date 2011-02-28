@@ -3,7 +3,7 @@ version: 0.0.0
 
 category: Game, Formal Methods, Theorem Provers
 
-synopsis: A client library for TheoremQuest, a theorem proving game.
+synopsis: A common library for TheoremQuest, a theorem proving game.
 
 description:
   TODO
